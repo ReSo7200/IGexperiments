@@ -226,15 +226,16 @@ public class Module implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                                             // Attempt to find the target class and second target class
                                             Class<?> targetClass = XposedHelpers.findClass(classToHook, lpparam.classLoader);
                                             Class<?> secondTargetClass = XposedHelpers.findClass(secondClassToHook, lpparam.classLoader);
+                                            Method[] methods = targetClass.getDeclaredMethods();
 
                                             // Catch NoClassDefFoundError within the method inspection loop
                                             try {
-                                                //XposedBridge.log("Trying class: " + classToHook);
+                                                // XposedBridge.log("Trying class: " + classToHook);
                                                 // Check if the target class has a Boolean-returning method named A00 with one parameter
                                                 for (Method method : targetClass.getDeclaredMethods()) {
-                                                    if (method.getName().equals("A00") &&
-                                                            method.getReturnType() == Boolean.TYPE &&
-                                                            method.getParameterCount() == 1) {
+                                                    if (methods.length == 1 && methods[0].getName().equals("A00") &&
+                                                            methods[0].getReturnType() == Boolean.TYPE &&
+                                                            methods[0].getParameterCount() == 1) {
 
                                                         XposedBridge.log("(IGExperiments) Hooking into class: " + classToHook);
                                                         XposedHelpers.findAndHookMethod(targetClass, "A00", secondTargetClass,
@@ -258,7 +259,7 @@ public class Module implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                                                 continue;
                                             }
 
-                                        } catch (XposedHelpers.ClassNotFoundError e) {
+                                        } catch (NoClassDefFoundError | XposedHelpers.ClassNotFoundError e) {
                                             //XposedBridge.log("(IGExperiments) Class " + classToHook + " not found, trying next.");
                                         } catch (NoSuchMethodError e) {
                                             //XposedBridge.log("(IGExperiments) Method A00 not found in class: " + classToHook);
